@@ -18,33 +18,26 @@ jobs:
     - name: Set up R
       uses: r-lib/actions/setup-r@v2
 
-    # 3. Install System Dependencies (필요한 경우 추가)
+    # 3. Install system dependencies
     - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y libcurl4-openssl-dev libssl-dev
 
-    # 4. Load environment variables from .env
-    - name: Load environment variables from .env
+    # 4. Set environment variables using GitHub Secrets
+    - name: Set environment variables
+      env:
+        RSCONNECT_USER: ${{ secrets.RSCONNECT_USER }}
+        RSCONNECT_TOKEN: ${{ secrets.RSCONNECT_TOKEN }}
+        RSCONNECT_SECRET: ${{ secrets.RSCONNECT_SECRET }}
       run: |
-        set -o allexport
-        source .env
-        set +o allexport
-
-    # Debug: Check .env file contents
-    - name: Debug .env file
-      run: cat .env
+        echo "Environment variables are set."
 
     # 5. Install R dependencies using renv
     - name: Install R dependencies
       run: |
         Rscript -e "install.packages('renv', repos='http://cran.r-project.org')"
         Rscript -e "renv::restore()"
-
-    # Debug: Check renv status
-    - name: Debug renv status
-      run: |
-        Rscript -e "renv::status()"
 
     # 6. Deploy Shiny App
     - name: Deploy Shiny App
