@@ -35,6 +35,10 @@ jobs:
 
     # 5. Debug Secrets
     - name: Debug Secrets
+      env:
+        RSCONNECT_USER: ${{ secrets.RSCONNECT_USER }}
+        RSCONNECT_TOKEN: ${{ secrets.RSCONNECT_TOKEN }}
+        RSCONNECT_SECRET: ${{ secrets.RSCONNECT_SECRET }}
       run: |
         echo "RSCONNECT_USER: $RSCONNECT_USER"
         echo "RSCONNECT_TOKEN: $RSCONNECT_TOKEN"
