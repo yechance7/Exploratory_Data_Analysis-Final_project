@@ -3,28 +3,42 @@ name: Deploy Shiny App to ShinyApps.io
 on:
   push:
     branches:
-      - yechan  # main 브랜치에 푸시될 때 실행
+      - main  # main 브랜치에 푸시될 때 실행
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
+    # 1. GitHub Repository Checkout
     - name: Checkout code
       uses: actions/checkout@v3
 
+    # 2. Set up R
     - name: Set up R
       uses: r-lib/actions/setup-r@v2
 
-    - name: Install rsconnect
+    # 3. Install System Dependencies (필요한 경우 추가)
+    - name: Install system dependencies
       run: |
-        Rscript -e "install.packages('rsconnect')"
+        sudo apt-get update
+        sudo apt-get install -y libcurl4-openssl-dev libssl-dev
 
+    # 4. Load environment variables from .env
+    - name: Load environment variables from .env
+      run: |
+        set -o allexport
+        source .env
+        set +o allexport
+
+    # 5. Install R dependencies using renv
+    - name: Install R dependencies
+      run: |
+        Rscript -e "install.packages('renv', repos='http://cran.r-project.org')"
+        Rscript -e "renv::restore()"
+
+    # 6. Deploy Shiny App
     - name: Deploy Shiny App
-      env:
-        RSCONNECT_USER: ${{ secrets.RSCONNECT_USER }}
-        RSCONNECT_TOKEN: ${{ secrets.RSCONNECT_TOKEN }}
-        RSCONNECT_SECRET: ${{ secrets.RSCONNECT_SECRET }}
       run: |
         Rscript -e "rsconnect::setAccountInfo(name=Sys.getenv('RSCONNECT_USER'), token=Sys.getenv('RSCONNECT_TOKEN'), secret=Sys.getenv('RSCONNECT_SECRET'))"
         Rscript -e "rsconnect::deployApp()"

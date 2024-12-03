@@ -25,7 +25,9 @@ settings.json
 *.log
 *.csv
 *.dcf
-*.lock
+
+# 보안파일
+.env
 
 
 
