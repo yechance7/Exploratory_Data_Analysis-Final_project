@@ -10,53 +10,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. GitHub Repository Checkout
-      - name: Checkout code
-        uses: actions/checkout@v3
+    # 1. GitHub Repository Checkout
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      # 2. Check secrets (Optional Debugging)
-      - name: Check secrets
-        env:
-          RSCONNECT_USER: ${{ secrets.RSCONNECT_USER }}
-          RSCONNECT_TOKEN: ${{ secrets.RSCONNECT_TOKEN }}
-          RSCONNECT_SECRET: ${{ secrets.RSCONNECT_SECRET }}
-        run: |
-          echo "Checking environment variables..."
-          if [ -z "$RSCONNECT_USER" ]; then
-            echo "Error: RSCONNECT_USER is missing!"
-            exit 1
-          fi
-          if [ -z "$RSCONNECT_TOKEN" ]; then
-            echo "Error: RSCONNECT_TOKEN is missing!"
-            exit 1
-          fi
-          if [ -z "$RSCONNECT_SECRET" ]; then
-            echo "Error: RSCONNECT_SECRET is missing!"
-            exit 1
-          fi
-          echo "All Secrets are set correctly."
+    # 2. Set up R
+    - name: Set up R
+      uses: r-lib/actions/setup-r@v2
 
-      # 3. Set up R
-      - name: Set up R
-        uses: r-lib/actions/setup-r@v2
+    # 3. Install system dependencies
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libcurl4-openssl-dev libssl-dev
 
-      # 4. Install system dependencies
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libcurl4-openssl-dev libssl-dev
+    # 4. Install rsconnect package
+    - name: Install rsconnect package
+      run: |
+        Rscript -e "install.packages('rsconnect', repos='http://cran.r-project.org')"
 
-      # 5. Install rsconnect package
-      - name: Install rsconnect package
-        run: |
-          Rscript -e "install.packages('rsconnect', repos='http://cran.r-project.org')"
-
-      # 6. Deploy Shiny App (Exclude renv.lock)
-      - name: Deploy Shiny App
-        env:
-          RSCONNECT_USER: ${{ secrets.RSCONNECT_USER }}
-          RSCONNECT_TOKEN: ${{ secrets.RSCONNECT_TOKEN }}
-          RSCONNECT_SECRET: ${{ secrets.RSCONNECT_SECRET }}
-        run: |
-          Rscript -e "rsconnect::setAccountInfo(name=Sys.getenv('RSCONNECT_USER'), token=Sys.getenv('RSCONNECT_TOKEN'), secret=Sys.getenv('RSCONNECT_SECRET'))"
-          Rscript -e "rsconnect::deployApp(appFiles = c('app.R', 'DESCRIPTION.txt', 'README.md'))"
+    # 5. Deploy Shiny App with forceUpdate
+    - name: Deploy Shiny App
+      run: |
+        Rscript -e "rsconnect::setAccountInfo(name=Sys.getenv('RSCONNECT_USER'), token=Sys.getenv('RSCONNECT_TOKEN'), secret=Sys.getenv('RSCONNECT_SECRET'))"
+        Rscript -e "rsconnect::deployApp(forceUpdate = TRUE)"
