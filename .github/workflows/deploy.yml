@@ -51,7 +51,7 @@ jobs:
         run: |
           Rscript -e "install.packages('rsconnect', repos='http://cran.r-project.org')"
 
-      # 6. Deploy Shiny App
+      # 6. Deploy Shiny App (Exclude renv.lock)
       - name: Deploy Shiny App
         env:
           RSCONNECT_USER: ${{ secrets.RSCONNECT_USER }}
@@ -59,4 +59,4 @@ jobs:
           RSCONNECT_SECRET: ${{ secrets.RSCONNECT_SECRET }}
         run: |
           Rscript -e "rsconnect::setAccountInfo(name=Sys.getenv('RSCONNECT_USER'), token=Sys.getenv('RSCONNECT_TOKEN'), secret=Sys.getenv('RSCONNECT_SECRET'))"
-          Rscript -e "rsconnect::deployApp()"
+          Rscript -e "rsconnect::deployApp(appFiles = c('app.R', 'DESCRIPTION.txt', 'README.md'))"
