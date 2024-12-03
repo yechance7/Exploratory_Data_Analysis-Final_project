@@ -28,9 +28,10 @@ jobs:
         sudo apt-get install -y libcurl4-openssl-dev libssl-dev
 
     # 4. Install rsconnect package
-    - name: Install rsconnect package
+    - name: Install required R packages
       run: |
-        Rscript -e "install.packages('rsconnect', repos='http://cran.r-project.org')"
+        Rscript -e "install.packages(c('shiny', 'httpuv', 'rmarkdown', 'knitr', 'jsonlite', 'htmltools', 'reticulate', 'rsconnect'), repos='http://cran.r-project.org')"
+
 
     # 5. Restore dependencies and deploy Shiny App
     - name: Restore dependencies and deploy
