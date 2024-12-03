@@ -24,12 +24,19 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libcurl4-openssl-dev libssl-dev
 
-    # 4. Install rsconnect package
+    # 4. Debug Secrets
+    - name: Debug Secrets
+      run: |
+        echo "RSCONNECT_USER: $RSCONNECT_USER"
+        echo "RSCONNECT_TOKEN: $RSCONNECT_TOKEN"
+        echo "RSCONNECT_SECRET: $RSCONNECT_SECRET"
+
+    # 5. Install rsconnect package
     - name: Install rsconnect package
       run: |
         Rscript -e "install.packages('rsconnect', repos='http://cran.r-project.org')"
 
-    # 5. Deploy Shiny App with forceUpdate
+    # 6. Deploy Shiny App with forceUpdate
     - name: Deploy Shiny App
       run: |
         Rscript -e "rsconnect::setAccountInfo(name=Sys.getenv('RSCONNECT_USER'), token=Sys.getenv('RSCONNECT_TOKEN'), secret=Sys.getenv('RSCONNECT_SECRET'))"
