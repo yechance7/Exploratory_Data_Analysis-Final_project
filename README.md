@@ -15,13 +15,10 @@ Exploratory_Data_Analysis-Final_project/
 
 ## 가상환경 설정
 R
-renv::activate() 
+renv::activate()    # 가상환경 실행
 
-### 가상환경 상태 확인
-renv::status()
-
-### 가상환경 설정 저장
-renv::snapshot()
+renv::status()      # 가상환경 상태 확인
+renv::snapshot()    # 가상환경 설정 저장
 
 ## 파일 실행
 shiny::runApp()

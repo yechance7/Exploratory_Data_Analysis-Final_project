@@ -31,11 +31,20 @@ jobs:
         source .env
         set +o allexport
 
+    # Debug: Check .env file contents
+    - name: Debug .env file
+      run: cat .env
+
     # 5. Install R dependencies using renv
     - name: Install R dependencies
       run: |
         Rscript -e "install.packages('renv', repos='http://cran.r-project.org')"
         Rscript -e "renv::restore()"
+
+    # Debug: Check renv status
+    - name: Debug renv status
+      run: |
+        Rscript -e "renv::status()"
 
     # 6. Deploy Shiny App
     - name: Deploy Shiny App
