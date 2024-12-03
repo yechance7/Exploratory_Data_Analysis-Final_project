@@ -38,9 +38,9 @@ jobs:
         RSCONNECT_DEBUG: 1 
       run: |
         echo "Restoring dependencies and deploying Shiny App with debug logs"
-        Rscript -e "renv::restore()"       # 의존성 복원
-        Rscript -e "renv::dependencies()"  # 의존성 점검
-        Rscript -e "renv::snapshot(confirm = TRUE)"  # renv.lock 갱신
+        Rscript -e "renv::snapshot(confirm = TRUE)"
+        Rscript -e "renv::restore()"       
+        Rscript -e "renv::dependencies()"  
         Rscript -e "rsconnect::setAccountInfo(name=Sys.getenv('RSCONNECT_USER'), token=Sys.getenv('RSCONNECT_TOKEN'), secret=Sys.getenv('RSCONNECT_SECRET'))"
         Rscript -e "options(rsconnect.debug = TRUE)"
         Rscript -e "rsconnect::deployApp(appDir = './', forceUpdate = TRUE)"
