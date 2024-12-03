@@ -1,0 +1,32 @@
+library/
+local/
+cellar/
+lock/
+python/
+sandbox/
+staging/
+git
+
+# R 관련 파일
+.RData
+.Rhistory
+.Rprofile
+.Rhistory
+.Renviron
+
+# renv 관련 파일
+renv/
+
+# 프로젝트 설정 파일
+settings.json
+
+# 기타 파일
+*.txt
+*.log
+*.csv
+*.dcf
+*.lock
+
+
+
+
