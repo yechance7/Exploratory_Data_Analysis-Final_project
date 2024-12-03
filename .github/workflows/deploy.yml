@@ -3,38 +3,41 @@ name: Deploy Shiny App to ShinyApps.io
 on:
   push:
     branches:
-      - yechan  # 푸시할 branch
+      - yechan
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest  
+    runs-on: ubuntu-latest
 
     steps:
     # 1. GitHub Repository Checkout
     - name: Checkout code
-      uses: actions/checkout@v3  
+      uses: actions/checkout@v3
 
     # 2. Set up R
     - name: Set up R
-      uses: r-lib/actions/setup-r@v2  
+      uses: r-lib/actions/setup-r@v2
 
     # 3. Install system dependencies
     - name: Install system dependencies
       run: |
-        sudo apt-get update  
-        sudo apt-get install -y libcurl4-openssl-dev libssl-dev  
+        sudo apt-get update
+        sudo apt-get install -y libcurl4-openssl-dev libssl-dev
 
     # 4. Install rsconnect package
     - name: Install rsconnect package
       run: |
-        Rscript -e "install.packages('rsconnect', repos='http://cran.r-project.org')"  # R에서 rsconnect 설치
+        Rscript -e "install.packages('rsconnect', repos='http://cran.r-project.org')"
 
-    # 5. Deploy Shiny App
-    - name: Deploy Shiny App
-      env:  
-        RSCONNECT_USER: ${{ secrets.RSCONNECT_USER }}  
-        RSCONNECT_TOKEN: ${{ secrets.RSCONNECT_TOKEN }} 
-        RSCONNECT_SECRET: ${{ secrets.RSCONNECT_SECRET }}  
+    # 5. Debugging and Deploy Shiny App
+    - name: Enable verbose logging and deploy
+      env:  # 환경 변수에 GitHub Secrets를 연결
+        RSCONNECT_USER: ${{ secrets.RSCONNECT_USER }}
+        RSCONNECT_TOKEN: ${{ secrets.RSCONNECT_TOKEN }}
+        RSCONNECT_SECRET: ${{ secrets.RSCONNECT_SECRET }}
+        RSCONNECT_DEBUG: 1 
       run: |
+        echo "Starting Shiny App deployment with debug logs"
         Rscript -e "rsconnect::setAccountInfo(name=Sys.getenv('RSCONNECT_USER'), token=Sys.getenv('RSCONNECT_TOKEN'), secret=Sys.getenv('RSCONNECT_SECRET'))"
+        Rscript -e "options(rsconnect.debug = TRUE)"
         Rscript -e "rsconnect::deployApp(appDir = './', forceUpdate = TRUE)"
