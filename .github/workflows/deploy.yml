@@ -3,7 +3,7 @@ name: Deploy Shiny App to ShinyApps.io
 on:
   push:
     branches:
-      - yechan
+      - yechan  # yechan 브랜치에 푸시될 때 실행
 
 jobs:
   deploy:
@@ -29,15 +29,18 @@ jobs:
       run: |
         Rscript -e "install.packages('rsconnect', repos='http://cran.r-project.org')"
 
-    # 5. Debugging and Deploy Shiny App
-    - name: Enable verbose logging and deploy
-      env:  # 환경 변수에 GitHub Secrets를 연결
+    # 5. Restore dependencies and deploy Shiny App
+    - name: Restore dependencies and deploy
+      env:
         RSCONNECT_USER: ${{ secrets.RSCONNECT_USER }}
         RSCONNECT_TOKEN: ${{ secrets.RSCONNECT_TOKEN }}
         RSCONNECT_SECRET: ${{ secrets.RSCONNECT_SECRET }}
         RSCONNECT_DEBUG: 1 
       run: |
-        echo "Starting Shiny App deployment with debug logs"
+        echo "Restoring dependencies and deploying Shiny App with debug logs"
+        Rscript -e "renv::restore()"       # 의존성 복원
+        Rscript -e "renv::dependencies()"  # 의존성 점검
+        Rscript -e "renv::snapshot(confirm = TRUE)"  # renv.lock 갱신
         Rscript -e "rsconnect::setAccountInfo(name=Sys.getenv('RSCONNECT_USER'), token=Sys.getenv('RSCONNECT_TOKEN'), secret=Sys.getenv('RSCONNECT_SECRET'))"
         Rscript -e "options(rsconnect.debug = TRUE)"
         Rscript -e "rsconnect::deployApp(appDir = './', forceUpdate = TRUE)"
