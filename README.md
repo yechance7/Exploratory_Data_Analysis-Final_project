@@ -18,6 +18,7 @@ R
 renv::activate()    # 가상환경 실행
 
 renv::status()      # 가상환경 상태 확인
+
 renv::snapshot()    # 가상환경 설정 저장
 
 ## 파일 실행
