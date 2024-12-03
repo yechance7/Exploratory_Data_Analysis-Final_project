@@ -10,7 +10,6 @@ Exploratory_Data_Analysis-Final_project/
 ├── renv.lock      # renv로 관리된 의존성 파일
 ├── app.R          # 메인 Shiny 파일
 ├── data/          # 데이터 파일
-├── .Renviron
 └── README.md      # 앱 설명
 ```
 

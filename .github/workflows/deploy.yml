@@ -3,7 +3,7 @@ name: Deploy Shiny App to ShinyApps.io
 on:
   push:
     branches:
-      - main  # main 브랜치에 푸시될 때 실행
+      - yechan  # 푸시할 branch
 
 jobs:
   deploy:
