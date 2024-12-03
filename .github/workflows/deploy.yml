@@ -34,8 +34,13 @@ jobs:
         key: ${{ runner.os }}-R-packages-${{ hashFiles('renv.lock') }}
         restore-keys: |
           ${{ runner.os }}-R-packages-
+          
+    # 5. Install required R packages
+    - name: Install required R packages
+      run: |
+        Rscript -e "if (!requireNamespace('shiny')) install.packages(c('shiny', 'httpuv', 'rmarkdown', 'knitr', 'jsonlite', 'htmltools', 'reticulate', 'rsconnect'), repos='http://cran.r-project.org')"
 
-    # 5. Deploy Shiny App
+    # 6. Deploy Shiny App
     - name: Deploy Shiny App
       env:
         RSCONNECT_USER: ${{ secrets.RSCONNECT_USER }}
