@@ -7,50 +7,34 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  
 
     steps:
     # 1. GitHub Repository Checkout
     - name: Checkout code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v3  
 
     # 2. Set up R
     - name: Set up R
-      uses: r-lib/actions/setup-r@v2
+      uses: r-lib/actions/setup-r@v2  
 
     # 3. Install system dependencies
     - name: Install system dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y libcurl4-openssl-dev libssl-dev
+        sudo apt-get update  
+        sudo apt-get install -y libcurl4-openssl-dev libssl-dev  
 
-    # 4. Export Secrets
-    - name: Export Secrets
-      env:
-        RSCONNECT_USER: ${{ secrets.RSCONNECT_USER }}
-        RSCONNECT_TOKEN: ${{ secrets.RSCONNECT_TOKEN }}
-        RSCONNECT_SECRET: ${{ secrets.RSCONNECT_SECRET }}
-      run: |
-        echo "Secrets have been exported"
-
-    # 5. Debug Secrets
-    - name: Debug Secrets
-      env:
-        RSCONNECT_USER: ${{ secrets.RSCONNECT_USER }}
-        RSCONNECT_TOKEN: ${{ secrets.RSCONNECT_TOKEN }}
-        RSCONNECT_SECRET: ${{ secrets.RSCONNECT_SECRET }}
-      run: |
-        echo "RSCONNECT_USER: $RSCONNECT_USER"
-        echo "RSCONNECT_TOKEN: $RSCONNECT_TOKEN"
-        echo "RSCONNECT_SECRET: $RSCONNECT_SECRET"
-
-    # 6. Install rsconnect package
+    # 4. Install rsconnect package
     - name: Install rsconnect package
       run: |
-        Rscript -e "install.packages('rsconnect', repos='http://cran.r-project.org')"
+        Rscript -e "install.packages('rsconnect', repos='http://cran.r-project.org')"  # R에서 rsconnect 설치
 
-    # 7. Deploy Shiny App with forceUpdate
+    # 5. Deploy Shiny App
     - name: Deploy Shiny App
+      env:  
+        RSCONNECT_USER: ${{ secrets.RSCONNECT_USER }}  
+        RSCONNECT_TOKEN: ${{ secrets.RSCONNECT_TOKEN }} 
+        RSCONNECT_SECRET: ${{ secrets.RSCONNECT_SECRET }}  
       run: |
         Rscript -e "rsconnect::setAccountInfo(name=Sys.getenv('RSCONNECT_USER'), token=Sys.getenv('RSCONNECT_TOKEN'), secret=Sys.getenv('RSCONNECT_SECRET'))"
-        Rscript -e "rsconnect::deployApp(forceUpdate = TRUE)"
+        Rscript -e "rsconnect::deployApp(appDir = './', forceUpdate = TRUE)"
