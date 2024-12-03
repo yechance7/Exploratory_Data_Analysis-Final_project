@@ -26,7 +26,22 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libcurl4-openssl-dev libssl-dev
 
-    # 4. Deploy Shiny App
+    # 4. Cache renv library
+    - name: Cache renv library
+      uses: actions/cache@v3
+      with:
+        path: ~/.local/share/renv
+        key: ${{ runner.os }}-renv-${{ hashFiles('renv.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-renv-
+
+    # 5. Restore dependencies with renv
+    - name: Restore R dependencies with renv
+      run: |
+        Rscript -e "install.packages('renv', repos='http://cran.r-project.org')"
+        Rscript -e "renv::restore()"
+
+    # 6. Deploy Shiny App
     - name: Deploy Shiny App
       env:
         RSCONNECT_USER: ${{ secrets.RSCONNECT_USER }}
@@ -34,8 +49,5 @@ jobs:
         RSCONNECT_SECRET: ${{ secrets.RSCONNECT_SECRET }}
       run: |
         echo "Deploying Shiny App"
-        Rscript -e "renv::snapshot(confirm = TRUE)"
-        Rscript -e "renv::restore()"       
-        Rscript -e "renv::dependencies()"  
         Rscript -e "rsconnect::setAccountInfo(name=Sys.getenv('RSCONNECT_USER'), token=Sys.getenv('RSCONNECT_TOKEN'), secret=Sys.getenv('RSCONNECT_SECRET'))"
         Rscript -e "rsconnect::deployApp(appDir = './', forceUpdate = TRUE)"
