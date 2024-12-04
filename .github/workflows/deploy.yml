@@ -29,8 +29,7 @@ jobs:
     # 4. Install required R packages
     - name: Install required R packages
       run: |
-        Rscript -e "install.packages(c('shiny', 'httpuv', 'htmltools', 'rsconnect'), repos='http://cran.r-project.org')"
-
+        Rscript -e "install.packages(c('shiny', 'ggplot2', 'dplyr'. 'httpuv', 'htmltools', 'rsconnect'), repos='http://cran.r-project.org')"
 
     # 5. Deploy Shiny App
     - name: Deploy Shiny App
@@ -42,6 +41,6 @@ jobs:
         echo "Deploying Shiny App"
         Rscript -e "renv::snapshot(confirm = TRUE)"
         Rscript -e "renv::restore()"       
-        Rscript -e "renv::dependencies()"  
+
         Rscript -e "rsconnect::setAccountInfo(name=Sys.getenv('RSCONNECT_USER'), token=Sys.getenv('RSCONNECT_TOKEN'), secret=Sys.getenv('RSCONNECT_SECRET'))"
         Rscript -e "rsconnect::deployApp(appDir = './', forceUpdate = TRUE)"

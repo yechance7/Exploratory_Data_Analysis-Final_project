@@ -1,88 +1,94 @@
+# 필요한 라이브러리
 library(shiny)
 library(ggplot2)
 library(dplyr)
 
-# 데이터 로드
-data <- read.csv("data/student-por.csv", sep = ";", header=TRUE)
-
-
-
 # UI 정의
 ui <- fluidPage(
-    titlePanel("학생 성적 분석"),  # 앱 제목
-    sidebarLayout(
-        sidebarPanel(
-            # 분석할 변수를 선택
-            selectInput("variable", "분석할 변수를 선택하세요:",
-                        choices = c("성별" = "sex", 
-                                    "주소 유형" = "address", 
-                                    "공부 시간" = "studytime", 
-                                    "대학 진학 의향" = "higher", 
-                                    "가족 관계 품질" = "famrel", 
-                                    "친구들과 노는 빈도" = "goout", 
-                                    "평일 음주량" = "Dalc", 
-                                    "건강 상태" = "health")),
-            # 시각화 유형을 선택
-            selectInput("plotType", "시각화 유형을 선택하세요:",
-                        choices = c("박스플롯" = "boxplot", 
-                                    "바이올린 플롯" = "violin",
-                                    "바 플롯 (평균)" = "bar",
-                                    "밀도 플롯" = "density",
-                                    "히트맵" = "heatmap",
-                                    "산점도 및 추세선" = "scatter"))
-        ),
-        # 플롯 출력
-        mainPanel(
-            plotOutput("mainPlot")
-        )
+  titlePanel("학생 성적 데이터 분석"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      selectInput("subject", "과목 선택:", 
+                  choices = c("수학" = "math", "국어" = "portuguese")),
+      selectInput("plot_type", "시각화 유형 선택:",
+                  choices = c("Boxplot" = "boxplot",
+                              "Density Plot" = "density",
+                              "Scatter Plot" = "scatter",
+                              "Histogram" = "histogram",
+                              "Violin Plot" = "violin",
+                              "Bar Plot" = "barplot")),
+      selectInput("x_var", "X축 변수 선택:", 
+                  choices = c("성별(sex)" = "sex", 
+                              "주소(address)" = "address", 
+                              "대학 희망 여부(higher)" = "higher")),
+      selectInput("y_var", "Y축 변수 선택:", 
+                  choices = c("최종 성적(G3)" = "G3")),
+      checkboxInput("show_summary", "데이터 요약 보기", FALSE)
+    ),
+    
+    mainPanel(
+      plotOutput("plot"),
+      conditionalPanel(
+        condition = "input.show_summary == true",
+        verbatimTextOutput("summary")
+      )
     )
+  )
 )
 
 # 서버 로직 정의
 server <- function(input, output) {
-    output$mainPlot <- renderPlot({
-        # 기본 ggplot 객체 생성
-        p <- ggplot(data, aes_string(x = input$variable, y = "G3"))
-        
-        # 시각화 유형에 따른 플롯 생성
-        if (input$plotType == "boxplot") {
-            # 박스플롯
-            p <- p + geom_boxplot(fill = "lightblue", color = "darkblue")
-        } else if (input$plotType == "violin") {
-            # 바이올린 플롯
-            p <- p + geom_violin(fill = "lightblue", color = "darkblue")
-        } else if (input$plotType == "bar") {
-            # 바 플롯 (평균)
-            p <- p + stat_summary(fun = "mean", geom = "bar", fill = "lightblue", color = "darkblue")
-        } else if (input$plotType == "density") {
-            # 밀도 플롯
-            p <- ggplot(data, aes_string(x = "G3", fill = input$variable)) +
-                geom_density(alpha = 0.6) +
-                labs(fill = input$variable)
-        } else if (input$plotType == "heatmap") {
-            # 히트맵
-            data_summary <- data %>%
-                group_by_at(vars(input$variable)) %>%
-                summarise(mean_grade = mean(G3, na.rm = TRUE)) %>%
-                mutate(variable = factor(!!sym(input$variable))) # 변수 동적 처리
-            p <- ggplot(data_summary, aes(x = variable, y = mean_grade, fill = mean_grade)) +
-                geom_tile() +
-                scale_fill_gradient(low = "white", high = "blue") +
-                labs(y = "평균 성적 (G3)", fill = "평균 성적")
-        } else if (input$plotType == "scatter") {
-            # 산점도 및 추세선
-            p <- ggplot(data, aes_string(x = input$variable, y = "G3")) +
-                geom_point(alpha = 0.6, position = position_jitter(width = 0.2)) +
-                geom_smooth(method = "lm", color = "red", se = FALSE)
-        }
-        
-        # 공통 테마 및 라벨 추가
-        p + labs(title = paste(input$variable, "에 따른 최종 성적"),
-                 x = input$variable,
-                 y = "최종 성적 (G3)") +
-            theme_minimal()
-    })
+  # 데이터 로드
+  math_data <- read.csv("data/student-mat.csv", sep = ";")
+  portuguese_data <- read.csv("data/student-por.csv", sep = ";")
+  
+  # 데이터 선택
+  selected_data <- reactive({
+    if (input$subject == "math") {
+      math_data
+    } else {
+      portuguese_data
+    }
+  })
+  
+  # 데이터 요약 출력
+  output$summary <- renderPrint({
+    data <- selected_data()
+    summary(data %>% select(input$x_var, input$y_var))
+  })
+  
+  # 시각화 출력
+  output$plot <- renderPlot({
+    data <- selected_data()
+    
+    if (input$plot_type == "boxplot") {
+      ggplot(data, aes_string(x = input$x_var, y = input$y_var)) +
+        geom_boxplot(fill = "lightblue") +
+        labs(title = "Boxplot", x = input$x_var, y = input$y_var)
+    } else if (input$plot_type == "density") {
+      ggplot(data, aes_string(x = input$y_var, fill = input$x_var)) +
+        geom_density(alpha = 0.5) +
+        labs(title = "Density Plot", x = input$y_var, fill = input$x_var)
+    } else if (input$plot_type == "scatter") {
+      ggplot(data, aes_string(x = input$x_var, y = input$y_var, color = input$x_var)) +
+        geom_jitter(width = 0.2, height = 0.2) +
+        labs(title = "Scatter Plot", x = input$x_var, y = input$y_var)
+    } else if (input$plot_type == "histogram") {
+      ggplot(data, aes_string(x = input$y_var)) +
+        geom_histogram(bins = 30, fill = "skyblue", color = "black") +
+        labs(title = "Histogram", x = input$y_var, y = "Frequency")
+    } else if (input$plot_type == "violin") {
+      ggplot(data, aes_string(x = input$x_var, y = input$y_var, fill = input$x_var)) +
+        geom_violin() +
+        labs(title = "Violin Plot", x = input$x_var, y = input$y_var)
+    } else if (input$plot_type == "barplot") {
+      ggplot(data, aes_string(x = input$x_var, fill = input$x_var)) +
+        geom_bar() +
+        labs(title = "Bar Plot", x = input$x_var, y = "Count")
+    }
+  })
 }
 
-# 애플리케이션 실행
+# Shiny 앱 실행
 shinyApp(ui = ui, server = server)
