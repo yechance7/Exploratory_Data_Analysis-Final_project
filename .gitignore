@@ -23,7 +23,6 @@ settings.json
 # 기타 파일
 *.txt
 *.log
-*.csv
 *.dcf
 
 # 보안파일
