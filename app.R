@@ -210,7 +210,7 @@
 # Server
   server <- function(input, output, session) {
     # Load and preprocess data
-    d1 <- reactive({ read.csv("student-mat.csv", sep = ";")%>%
+    d1 <- reactive({ read.csv("data/student-mat.csv", sep = ";")%>%
         mutate(across(where(is.character), as.factor)) %>%
         mutate(across(where(is.integer), as.factor)) %>%
         mutate(across(c(age, G1, G2, G3, absences), as.character)) %>%
@@ -218,7 +218,7 @@
         mutate(subject = "Math") 
     })
     
-    d2 <- reactive({ read.csv("student-por.csv", sep = ";")%>%
+    d2 <- reactive({ read.csv("data/student-por.csv", sep = ";")%>%
         mutate(across(where(is.character), as.factor)) %>%
         mutate(across(where(is.integer), as.factor)) %>%
         mutate(across(c(age, G1, G2, G3, absences), as.character)) %>%
