@@ -29,7 +29,7 @@ jobs:
     # 4. Install required R packages
     - name: Install required R packages
       run: |
-        Rscript -e "install.packages(c('shiny', 'DT','ggplot2', 'dplyr', 'httpuv', 'htmltools', 'rsconnect'), repos='http://cran.r-project.org')"
+        Rscript -e "install.packages(c('shiny', 'DT','ggplot2', 'dplyr', 'tidyr','httpuv', 'htmltools', 'rsconnect'), repos='http://cran.r-project.org')"
 
     # 5. Deploy Shiny App
     - name: Deploy Shiny App
