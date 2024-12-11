@@ -13,10 +13,9 @@ ui <- fluidPage(
              sidebarLayout(
                sidebarPanel(
                  selectInput("subject1", "Select Subject:", 
-                             choices = c("Math" = "math", "Portuguese" = "portuguese")),
+                             choices = c("Math" = "math", "Language" = "portuguese")),
                  selectInput("category1", "Select Variable:", 
                              choices = c(
-                               "School" = "school",
                                "Sex" = "sex",
                                "Age" = "age",
                                "Home Address" = "address",
@@ -69,7 +68,7 @@ ui <- fluidPage(
              sidebarLayout(
                sidebarPanel(
                  selectInput("subject2", "Select Subject", 
-                             choices = c("Math" = "math", "Portuguese" = "portuguese")),
+                             choices = c("Math" = "math", "Language" = "portuguese")),
                  selectizeInput("independent_vars", "Independent Variables (X)", 
                                 choices = NULL, multiple = TRUE),
                  actionButton("run_analysis", "Run Analysis")
@@ -83,7 +82,7 @@ ui <- fluidPage(
     tabPanel("3. Grades Across Binary Variables",
              sidebarLayout(
                sidebarPanel(
-                 selectInput("subject3", "Select Subject", choices = c("Math" = "math", "Portuguese" = "portuguese")),
+                 selectInput("subject3", "Select Subject", choices = c("Math" = "math", "Language" = "portuguese")),
                  selectInput("plot_type", "Select Plot Type", 
                              choices = c("Density Plot" = "density",
                                          "Scatter Plot" = "scatter",
@@ -91,8 +90,7 @@ ui <- fluidPage(
                                          "Bar Plot" = "barplot",
                                          "Box Plot" = "boxplot"), selected="density"),
                  selectInput("x_var", "Independent Variables (X)", 
-                             choices = c("School" = "school",
-                                         "Sex" = "sex",
+                             choices = c("Sex" = "sex",
                                          "Home Address" = "address",
                                          "Family Size" = "famsize",
                                          "Parental Status" = "Pstatus",
@@ -115,7 +113,7 @@ ui <- fluidPage(
     tabPanel("4. Grades Across Categorical Variables",
              sidebarLayout(
                sidebarPanel(
-                 selectInput("subject4", "Select Subject", choices = c("Math" = "math", "Portuguese" = "portuguese")),
+                 selectInput("subject4", "Select Subject", choices = c("Math" = "math", "Language" = "portuguese")),
                  selectInput("fill_variable", "Select Categorical Variable", choices = c(
                    "Mother's Education" = "Medu",
                    "Father's Education" = "Fedu",
@@ -143,8 +141,7 @@ ui <- fluidPage(
     tabPanel("5. Grades by Absences",
              sidebarLayout(
                sidebarPanel(
-                 selectInput("subject5", "Select Subject", choices = list("Math" = "math", "Portuguese" = "portuguese")),
-                 helpText("Absences: Number of absences")
+                 selectInput("subject5", "Select Subject", choices = list("Math" = "math", "Language" = "portuguese"))
                ),
                mainPanel(
                  plotOutput("scorePlot"),
@@ -156,8 +153,8 @@ ui <- fluidPage(
     tabPanel("6. Grades by Age and Sex",
              sidebarLayout(
                sidebarPanel(
-                 selectInput("subject6", "Select Subject", choices = c("Math" = "math", "Portuguese" = "portuguese")),
-                 radioButtons("plotType", "Select Plot", choices = c("Bar Plot", "Box Plot", "Line Plot")),
+                 selectInput("subject6", "Select Subject", choices = c("Math" = "math", "Language" = "portuguese")),
+                 radioButtons("plotType", "Select Plot", choices = c("Bar Plot", "Box Plot", "Line Plot"), selected="Line Plot"),
                  uiOutput("ageInputUI"),
                  uiOutput("ageRangeUI")
                ),
@@ -184,12 +181,11 @@ ui <- fluidPage(
                  )),
                  selectInput("subject7", 
                              label = "Select Subject", 
-                             choices = c("Math" = "math", "Portuguese" = "portuguese"),
+                             choices = c("Math" = "math", "Language" = "portuguese"),
                              selected = "math"),
                  selectInput("category", 
                              label = "Category to Highlight", 
                              choices = c(
-                               "School" = "school",
                                "Sex" = "sex",
                                "Home Address" = "address",
                                "Family Size" = "famsize",
@@ -232,7 +228,7 @@ ui <- fluidPage(
       "8. Drinking by Age",
       sidebarLayout(
         sidebarPanel(
-          selectInput("subject8", "Select Subject", choices = c("Math" = "math", "Portuguese" = "portuguese")),
+          selectInput("subject8", "Select Subject", choices = c("Math" = "math", "Language" = "portuguese")),
           selectInput("days", "Select Days", 
                       choices = c("Weekday Alcohol Consumption" = "Dalc", 
                                   "Weekend Alcohol Consumption" = "Walc"),
@@ -256,7 +252,6 @@ server <- function(input, output, session) {
   # Define a mapping from variable codes to descriptive labels
   var_labels <- list(
     # Section 1 and others
-    school = "School",
     sex = "Sex",
     age = "Age",
     address = "Home Address",
@@ -304,7 +299,7 @@ server <- function(input, output, session) {
       mutate(across(where(is.integer), as.factor)) %>%
       mutate(across(c(age, G1, G2, G3, absences), as.character)) %>%
       mutate(across(c(age, G1, G2, G3, absences), as.integer)) %>%
-      mutate(subject = "Portuguese")
+      mutate(subject = "Language")
   })
   
   # Reactive expressions for each section's data
@@ -383,7 +378,6 @@ server <- function(input, output, session) {
   # 1. Summary 
   # Variable descriptions
   descriptions <- list(
-    school = "Student's school: 'GP' - Gabriel Pereira, 'MS' - Mousinho da Silveira",
     sex = "Student's Sex: 'F' - female, 'M' - male",
     age = "Student's age: numeric, from 15 to 22",
     address = "Home address type: 'U' - urban, 'R' - rural",
@@ -457,7 +451,7 @@ server <- function(input, output, session) {
   # 2. Regression Analysis
   observe({
     req(selected_data_2())
-    excluded_vars <- c("G3", "G1", "G2")
+    excluded_vars <- c("G3", "G1", "G2", "school")
     available_vars <- setdiff(names(selected_data_2()), c(excluded_vars, "subject"))
     updateSelectizeInput(session, "independent_vars", 
                          choices = setNames(available_vars, sapply(available_vars, function(var) var_labels[[var]])),
@@ -612,7 +606,7 @@ server <- function(input, output, session) {
         labs(
           title = paste("Box Plot of Grade by Sex, for Age", input$Age),
           x = "Sex",
-          y = "Final Grade (G3)"
+          y = "Grade"
         ) +
         theme_minimal() +
         scale_x_discrete(labels = var_labels[unique(filtered_data$sex)])
@@ -641,7 +635,14 @@ server <- function(input, output, session) {
   # Dynamic UI for age selection
   output$ageInputUI <- renderUI({
     if (input$plotType %in% c("Bar Plot", "Box Plot")) {
-      numericInput("Age", "Student Age (15-22)", value = 15, min = 15, max = 22, step = 1)
+      tagList(
+      numericInput("Age", "Student Age (15-22)", value = 15, min = 15, max = 22, step = 1),
+      HTML("<ul>
+      <li>Age is between 15 and 22.
+      <li>Selecting up to 19 is recommended.</li>
+      <li>Ages 20 to 22 have very few samples.</li>
+    </ul>")
+      )
     }
   })
   
@@ -747,7 +748,6 @@ server <- function(input, output, session) {
                              "Medu" = "Mother's Education<br>(0: none - 4: higher education)",
                              "Fedu" = "Father's Education<br>(0: none - 4: higher education)",
                              "sex" = "Sex<br>(F: female, M: male)",
-                             "school" = "School<br>(GP: Gabriel Pereira, MS: Mousinho da Silveira)",
                              "famsize" = "Family Size<br>(LE3: <=3, GT3: >3)",
                              "Pstatus" = "Parental Status<br>(T: together, A: apart)",
                              "Mjob" = "Mother's Job",
